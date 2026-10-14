@@ -24,5 +24,14 @@ jobs:
 
       - name: Verificar que la app responde
         run: |
-          sleep 40
-          curl -f http://localhost:3000
+          for i in $(seq 1 30); do
+            if curl -fsL http://localhost:3000/iPod-Classic/ > /dev/null; then
+              echo "La app responde correctamente"
+              exit 0
+            fi
+            echo "Esperando a la app... intento $i"
+            sleep 5
+          done
+          echo "La app no respondio"
+          docker logs ipod-classic
+          exit 1
