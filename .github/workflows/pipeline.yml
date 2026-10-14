@@ -5,13 +5,24 @@ on:
   workflow_dispatch:
 
 jobs:
-  echo-job:
-    name: Run Echo Commands
+  build-and-run:
+    name: Build y despliegue con Docker
     runs-on: self-hosted
 
     steps:
-      - name: Step 1 - Basic Echo
-        run: echo "Hello! This is a simple GitHub Actions pipeline."
+      - name: Descargar el codigo
+        uses: actions/checkout@v4
 
-      - name: Step 2 - Echo Current Date
-        run: echo "The current date and time is $(date)"
+      - name: Construir la imagen Docker
+        run: docker build -t ipod-classic .
+
+      - name: Eliminar contenedor anterior (si existe)
+        run: docker rm -f ipod-classic || true
+
+      - name: Ejecutar el contenedor
+        run: docker run -d --name ipod-classic -e CI=true -p 3000:3000 ipod-classic
+
+      - name: Verificar que la app responde
+        run: |
+          sleep 40
+          curl -f http://localhost:3000
